@@ -1,11 +1,14 @@
 var Nightmare = require('nightmare');
-var gitHubPO = require('./github');
-
 var nm = Nightmare({ show: true });
+var gitHubPO = require('./github')(nm);
+
 
 var query = 'ugly hack';
 
-nm
-  .use(gitHubPO.search(query))
-  .end()
-  .then(() => console.log('Done'));
+gitHubPO.search(query)
+  .then(gitHubPO.iterateOverPages(
+    () => nm.url().then((currentUrl) => console.log(currentUrl)),
+    () => nm.end().then(() => {
+        console.log('Done');
+      })
+  ));
