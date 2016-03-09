@@ -1,14 +1,38 @@
 var Nightmare = require('nightmare');
-var nm = Nightmare({ show: true });
-var gitHubPO = require('./github')(nm);
-
+var nightmare = Nightmare({ show: true });
+var vo = require('vo');
+// var gitHubPO = require('./github')(nightmare);
 
 var query = 'ugly hack';
 
-gitHubPO.search(query)
-  .then(gitHubPO.iterateOverPages(
-    () => nm.url().then((currentUrl) => console.log(currentUrl)),
-    () => nm.end().then(() => {
-        console.log('Done');
-      })
-  ));
+vo(function* () {
+  yield nightmare
+    .goto('https://github.com/search')
+    .insert('.search-form-fluid input[type=text]', query)
+    .click('.search-form-fluid button[type=submit]')
+    .wait('.codesearch-results');
+
+  var i = 0;
+  var hasNextPage = yield nightmare.exists('a[rel="next"]');
+  do {
+    var url = yield nightmare.url();
+    console.log('Process page', url);
+    hasNextPage = yield nightmare.exists('a[rel="next"]')
+    if(hasNextPage) {
+      yield nightmare
+        .click('a[rel="next"]')
+        .wait(3000);
+    }
+    i++;
+  } while(hasNextPage);
+
+  return i;
+})(function (err, result) {
+  console.log(result, err);
+  if (err) {
+    console.error(err);
+    return err;
+  }
+
+  console.log(`Done for ${result} pages`);
+});;

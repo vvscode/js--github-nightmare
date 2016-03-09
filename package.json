@@ -9,6 +9,7 @@
   "author": "",
   "license": "ISC",
   "dependencies": {
-    "nightmare": "^2.2.0"
+    "nightmare": "^2.2.0",
+    "vo": "^3.0.4"
   }
 }
